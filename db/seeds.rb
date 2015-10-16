@@ -9,8 +9,14 @@ Project.delete_all
 Financial.delete_all
 DevelopmentPlan.delete_all
 
+def get_random_date(t1, t2)
+  diff = rand * (t2 - t1)
+  rt = t1 + diff
+  rt.strftime("%Y-%m-%d")
+end
+
 projects_saved = false
-roi_pitch = 'We are building a multi-storeyed, amenity-enabled standalone building that will hime 12 apartments. The land on which the building will be built is title and litigation free and located in the Koramangala neighborhood in Bangalore - one of the hottest localities in the city with the highest rate of appreciation in real estate for the last 10 years and forecasted to only see further appreciation as Bangalore continues to attract more companies and people. If you are looking to invest in a property that sees rapid appreciation and equally quick liquidity, you would be interested in investing here.'
+roi_pitch = 'We are building a multi-storeyed, amenity-enabled standalone building that will home 12 apartments. The land on which the building will be built is title and litigation free and located in the Koramangala neighborhood in Bangalore - one of the hottest localities in the city with the highest rate of appreciation in real estate for the last 10 years and forecasted to only see further appreciation as Bangalore continues to attract more companies and people. If you are looking to invest in a property that sees rapid appreciation and equally quick liquidity, you would be interested in investing here.'
 Project.transaction do
   listing_ids = 1..51
   listing_ids.each do |listing_id|
@@ -19,13 +25,9 @@ Project.transaction do
     num_floors = (rand * 3).to_i + 4
     num_flats = (rand * 6).to_i + 10
     flat_selling_price = (((rand * 110).to_i) / 10.0) * 100000 + 5000000
-    t1 = Time.local(2015, 12, 12)
-    t2 = Time.local(2017, 12, 12)
-    diff = rand * (t2 - t1)
-    rt = t1 + diff
-    fund_raise_completion = rt.strftime("%Y-%m-%d")
-    rt = t1 + 2 * diff
-    completion_time = rt.strftime("%Y-%m-%d")
+    completion_time = get_random_date(Time.local(2016, 06, 06), Time.local(2017, 12, 12))
+    fund_raise_start = get_random_date(Time.local(2015, 10, 01), Time.local(2015, 11, 10))
+    fund_raise_completion = (fund_raise_start.to_time + (rand * 20 + 10).days).strftime("%Y-%m-%d")
 
     milestones = [
         { name: 'Basement', fund: 20 },
@@ -35,10 +37,14 @@ Project.transaction do
         { name: 'Finishing', fund: 20 },
     ]
 
-    (0..4).each do |i|
-      rt = t1 + diff + diff*(i+1)/5
+    milestone_start_date = fund_raise_completion.to_time + 10.days
+    diff = (completion_time.to_time - milestone_start_date)/5
+
+    (0..3).each do |i|
+      rt = milestone_start_date + diff * (i + 1)
       milestones[i][:date] = rt.strftime("%Y-%m-%d")
     end
+    milestones[4][:date] = completion_time
 
     land_cost = ((rand * 180).to_i / 10) * 1000000 + 2000000
     investment_sum_required = [0.8, 0.7, 0.6][rand * 3] * (flat_selling_price * num_flats)
@@ -67,6 +73,7 @@ Project.transaction do
                 personal_investment: personal_investment,
                 roi_pitch: roi_pitch,
                 is_active: true,
+                fund_raise_start: fund_raise_start,
                 fund_raise_completion: fund_raise_completion,
                 milestones: milestones
             }

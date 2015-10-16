@@ -43,6 +43,7 @@ ActiveRecord::Schema.define(version: 20151016120511) do
     t.datetime "updated_at",                                       null: false
     t.text     "milestones"
     t.integer  "current_milestone"
+    t.date     "fund_raise_start"
     t.date     "fund_raise_completion"
   end
 
