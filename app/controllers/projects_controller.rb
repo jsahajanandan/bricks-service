@@ -20,7 +20,9 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
-    render json: @project.as_json(:include => [:development_plan, :financial])
+    project = @project.as_json(:include => [:development_plan, :financial])
+    project['stats'] = get_stats(project['financial']['fund_raise_start'], project['financial']['fund_raise_completion'], project['development_plan']['completion_date'], project['financial']['num_bricks'])
+    render json: project
   end
 
   # POST /projects
@@ -71,5 +73,80 @@ class ProjectsController < ApplicationController
       params.require(:project).permit(:listing_id, :project_tag,
                                       development_plan_attributes: [:num_floors, :num_flats, :flat_type, :flat_area, :flat_selling_price, :completion_date],
                                       financial_attributes: [:land_cost, :investment_sum_required, :num_bricks, :brick_value, :personal_investment, :roi_pitch, :is_active])
+    end
+
+    def get_stats(start_date, fund_end_date , end_date, total_bricks)
+      puts start_date
+      puts fund_end_date
+      puts end_date
+
+      months = (start_date..end_date).map{|d| Date::ABBR_MONTHNAMES[d.month] + ", " +  d.year.to_s }.uniq
+
+      stats = {
+          land: {},
+          flat: {},
+          rent_3bhk: {},
+          rent_2bhk: {},
+          rent_1bhk: {},
+          bricks: {}
+      }
+
+      land = 2500
+      flat = 5000
+      rent_3bhk = 21000
+      rent_2bhk = 17000
+      rent_1bhk = 11000
+
+      months.each do |month|
+        sign = (rand - 0.5) > 0 ? 1 : -1
+
+        land = land + sign * rand * 500
+        stats[:land][month] = land
+
+        flat = flat + sign * rand * 1000
+        stats[:flat][month] = flat
+
+        rent_3bhk = rent_3bhk + sign * rand * 200
+        stats[:rent_3bhk][month] = rent_3bhk
+
+        rent_2bhk = rent_2bhk + sign * rand * 200
+        stats[:rent_2bhk][month] = rent_2bhk
+
+        rent_1bhk = rent_1bhk + sign * rand * 200
+        stats[:rent_1bhk][month] = rent_1bhk
+      end
+
+      if start_date < Time.now.to_date
+
+        if fund_end_date > Time.now.to_date
+          end_date = Time.now.to_date
+          target = total_bricks * (Time.now.to_date - start_date) / (fund_end_date - start_date)
+        else
+          end_date = fund_end_date
+          target = total_bricks
+        end
+
+        days = (start_date..end_date).map{|d| Date::ABBR_MONTHNAMES[d.month] + ' ' +  d.day.to_s + ', ' + d.year.to_s }.uniq
+        bricks = 0
+        diff = target/days.size
+
+        days.each do |day|
+          random_diff = (rand * diff * 2).to_i
+          bricks = bricks + random_diff
+          if bricks >= target
+            bricks = bricks - random_diff
+            stats[:bricks][day] = total_bricks - bricks
+            bricks = total_bricks
+          else
+            stats[:bricks][day] = random_diff
+          end
+        end
+
+        puts target
+        puts bricks
+
+      end
+
+      stats
     end
 end
