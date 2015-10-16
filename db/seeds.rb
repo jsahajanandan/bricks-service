@@ -16,8 +16,25 @@ Project.transaction do
     flat_selling_price = (((rand * 110).to_i) / 10.0) * 100000 + 5000000
     t1 = Time.local(2015, 12, 12)
     t2 = Time.local(2017, 12, 12)
-    rt = t1 + rand * (t2 - t1)
+    diff = rand * (t2 - t1)
+    rt = t1 + diff
+    fund_raise_completion = rt.strftime("%Y-%m-%d")
+    rt = t1 + 2 * diff
     completion_time = rt.strftime("%Y-%m-%d")
+
+    milestones = [
+        { name: 'Basement', fund: 20 },
+        { name: 'First Floor', fund: 20 },
+        { name: 'Second Floor', fund: 20 },
+        { name: 'Third Floor', fund: 20 },
+        { name: 'Finishing', fund: 20 },
+    ]
+
+    (0..4).each do |i|
+      rt = t1 + diff + diff*(i+1)/5
+      milestones[i][:date] = rt.strftime("%Y-%m-%d")
+    end
+
     land_cost = ((rand * 180).to_i / 10) * 1000000 + 2000000
     investment_sum_required = [0.8, 0.7, 0.6][rand * 3] * (flat_selling_price * num_flats)
     personal_investment = land_cost + [0.1, 0.2, 0.3][rand * 3] * investment_sum_required
@@ -47,7 +64,9 @@ Project.transaction do
                 brick_value: brick_value,
                 personal_investment: personal_investment,
                 roi_pitch: "ROI ROI ROI ROI ROI!", # Replace
-                is_active: true
+                is_active: true,
+                fund_raise_completion: fund_raise_completion,
+                milestones: milestones
             }
         }
     Project.create!(params)
