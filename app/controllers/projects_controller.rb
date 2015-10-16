@@ -18,7 +18,18 @@ class ProjectsController < ApplicationController
       @projects = @projects.joins(:brick_holders).where("brick_holders.user_id = ? AND brick_holders.num_bricks > 0", params["brick_holder_user_id"])
     end
 
-    render json: @projects.all.as_json(:include => [:development_plan, :financial] + (params.has_key?("brick_holder_user_id") ? [:brick_holders] : []))
+    page = params[:page] ? params[:page] : 1
+    per_page = params[:per_page] ? params[:per_page] : 10
+    @projects = @projects.paginate(:page => page, :per_page => per_page)
+    projects_json = @projects.all.as_json(:include => [:development_plan, :financial] + (params.has_key?("brick_holder_user_id") ? [:brick_holders] : []))
+
+    render :json => {
+               :current_page => @projects.current_page,
+               :per_page => @projects.per_page,
+               :total_entries => @projects.total_entries,
+               :total_pages => @projects.total_pages,
+               :projects => projects_json
+           }
   end
 
   # GET /projects/1

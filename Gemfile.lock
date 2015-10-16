@@ -95,6 +95,7 @@ GEM
     thread_safe (0.3.5)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
+    will_paginate (3.0.7)
 
 PLATFORMS
   ruby
@@ -104,3 +105,4 @@ DEPENDENCIES
   rails (= 4.2.3)
   rails-api
   spring
+  will_paginate
