@@ -40,9 +40,6 @@ Project.transaction do
     personal_investment = land_cost + [0.1, 0.2, 0.3][rand * 3] * investment_sum_required
     brick_value = ((rand * 5).to_i) * 1000 + 1000
     num_bricks = (investment_sum_required + land_cost) / brick_value
-    is_active = true
-    #project_tag = %w(UNKNOWN, HOT_INVESTMENT, RISING, POPULAR_LOCATION, NEW)[rand * 5]
-    #flat_type = %w(UNKNOWN, BHK, BHK2, BHK3])[rand * 3]
     project_tag = (rand * 4).to_i + 1
     flat_type = (rand * 3).to_i + 1
 
