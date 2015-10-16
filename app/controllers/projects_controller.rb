@@ -18,7 +18,13 @@ class ProjectsController < ApplicationController
       @projects = @projects.joins(:brick_holders).where("brick_holders.user_id = ? AND brick_holders.num_bricks > 0", params["brick_holder_user_id"])
     end
 
-    render json: @projects.all.as_json(:include => [:development_plan, :financial] + (params.has_key?("brick_holder_user_id") ? [:brick_holders] : []))
+    projects = @projects.all.as_json(:include => [:development_plan, :financial] + (params.has_key?("brick_holder_user_id") ? [:brick_holders] : []))
+
+    (0..projects.size-1).each do |i|
+      projects[i]['stats'] = get_stats(projects[i]['financial']['fund_raise_start'], projects[i]['financial']['fund_raise_completion'], projects[i]['development_plan']['completion_date'], projects[i]['financial']['num_bricks'])
+    end
+
+    render json: projects
   end
 
   # GET /projects/1
@@ -104,9 +110,17 @@ class ProjectsController < ApplicationController
     end
 
     def get_stats(start_date, fund_end_date , end_date, total_bricks)
-      puts start_date
-      puts fund_end_date
-      puts end_date
+      if start_date.class == String
+        start_date = start_date.to_date
+      end
+
+      if fund_end_date.class == String
+        fund_end_date = fund_end_date.to_date
+      end
+
+      if end_date.class == String
+        end_date = end_date.to_date
+      end
 
       months = (start_date..end_date).map{|d| Date::ABBR_MONTHNAMES[d.month] + ", " +  d.year.to_s }.uniq
 
