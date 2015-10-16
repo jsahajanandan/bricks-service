@@ -1,6 +1,7 @@
 class Project < ActiveRecord::Base
   has_one :development_plan, dependent: :destroy
   has_one :financial, dependent: :destroy
+  has_many :brick_holders, dependent: :destroy
 
   accepts_nested_attributes_for :development_plan
   accepts_nested_attributes_for :financial
