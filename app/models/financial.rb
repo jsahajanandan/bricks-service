@@ -14,4 +14,5 @@ class Financial < ActiveRecord::Base
       h
     end
   end
+
 end

@@ -21,21 +21,27 @@ class ProjectsController < ApplicationController
     page = params[:page] ? params[:page] : 1
     per_page = params[:per_page] ? params[:per_page] : 10
     @projects = @projects.paginate(:page => page, :per_page => per_page)
-    projects_json = @projects.all.as_json(:include => [:development_plan, :financial] + (params.has_key?("brick_holder_user_id") ? [:brick_holders] : []))
+    projects = @projects.all.as_json(:include => [:development_plan, :financial] + (params.has_key?("brick_holder_user_id") ? [:brick_holders] : []))
+
+    (0..projects.size-1).each do |i|
+      projects[i]['stats'] = get_stats(projects[i]['financial']['fund_raise_start'], projects[i]['financial']['fund_raise_completion'], projects[i]['development_plan']['completion_date'], projects[i]['financial']['num_bricks'])
+    end
 
     render :json => {
                :current_page => @projects.current_page,
                :per_page => @projects.per_page,
                :total_entries => @projects.total_entries,
                :total_pages => @projects.total_pages,
-               :projects => projects_json
+               :projects => projects
            }
   end
 
   # GET /projects/1
   # GET /projects/1.json
   def show
-    render json: @project.as_json(:include => [:development_plan, :financial])
+    project = @project.as_json(:include => [:development_plan, :financial])
+    project['stats'] = get_stats(project['financial']['fund_raise_start'], project['financial']['fund_raise_completion'], project['development_plan']['completion_date'], project['financial']['num_bricks'])
+    render json: project
   end
 
   # POST /projects
@@ -102,13 +108,96 @@ class ProjectsController < ApplicationController
 
   private
 
-    def set_project
-      @project = Project.find(params[:id])
+  def set_project
+    @project = Project.find(params[:id])
+  end
+
+  def project_params
+    params.require(:project).permit(:listing_id, :project_tag,
+                                    development_plan_attributes: [:num_floors, :num_flats, :flat_type, :flat_area, :flat_selling_price, :completion_date],
+                                    financial_attributes: [:land_cost, :investment_sum_required, :num_bricks, :brick_value, :personal_investment, :roi_pitch, :is_active, :milestones, :current_milestone, :fund_raise_start, :fund_raise_completion])
+  end
+
+  def get_stats(start_date, fund_end_date, end_date, total_bricks)
+    if start_date.class == String
+      start_date = start_date.to_date
     end
 
-    def project_params
-      params.require(:project).permit(:listing_id, :project_tag,
-                                      development_plan_attributes: [:num_floors, :num_flats, :flat_type, :flat_area, :flat_selling_price, :completion_date],
-                                      financial_attributes: [:land_cost, :investment_sum_required, :num_bricks, :brick_value, :personal_investment, :roi_pitch, :is_active, :milestones, :current_milestone, :fund_raise_start, :fund_raise_completion])
+    if fund_end_date.class == String
+      fund_end_date = fund_end_date.to_date
     end
+
+    if end_date.class == String
+      end_date = end_date.to_date
+    end
+
+    months = (start_date..end_date).map { |d| Date::ABBR_MONTHNAMES[d.month] + ", " + d.year.to_s }.uniq
+
+    stats = {
+        land: {},
+        flat: {},
+        rent_3bhk: {},
+        rent_2bhk: {},
+        rent_1bhk: {},
+        bricks: {}
+    }
+
+    land = 2500
+    flat = 5000
+    rent_3bhk = 21000
+    rent_2bhk = 17000
+    rent_1bhk = 11000
+
+    months.each do |month|
+      sign = (rand - 0.5) > 0 ? 1 : -1
+
+      land = land + sign * rand * 500
+      stats[:land][month] = land
+
+      flat = flat + sign * rand * 1000
+      stats[:flat][month] = flat
+
+      rent_3bhk = rent_3bhk + sign * rand * 200
+      stats[:rent_3bhk][month] = rent_3bhk
+
+      rent_2bhk = rent_2bhk + sign * rand * 200
+      stats[:rent_2bhk][month] = rent_2bhk
+
+      rent_1bhk = rent_1bhk + sign * rand * 200
+      stats[:rent_1bhk][month] = rent_1bhk
+    end
+
+    if start_date < Time.now.to_date
+
+      if fund_end_date > Time.now.to_date
+        end_date = Time.now.to_date
+        target = total_bricks * (Time.now.to_date - start_date) / (fund_end_date - start_date)
+      else
+        end_date = fund_end_date
+        target = total_bricks
+      end
+
+      days = (start_date..end_date).map { |d| Date::ABBR_MONTHNAMES[d.month] + ' ' + d.day.to_s + ', ' + d.year.to_s }.uniq
+      bricks = 0
+      diff = target/days.size
+
+      days.each do |day|
+        random_diff = (rand * diff * 2).to_i
+        bricks = bricks + random_diff
+        if bricks >= target
+          bricks = bricks - random_diff
+          stats[:bricks][day] = total_bricks - bricks
+          bricks = total_bricks
+        else
+          stats[:bricks][day] = random_diff
+        end
+      end
+
+      puts target
+      puts bricks
+
+    end
+
+    stats
+  end
 end
