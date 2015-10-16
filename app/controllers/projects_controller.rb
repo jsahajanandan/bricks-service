@@ -10,8 +10,12 @@ class ProjectsController < ApplicationController
       @projects = @projects.where(:user_id => params["user_id"].to_i)
     end
 
-    if params.has_key?("is_active")
+    if params.has_key?("active")
       @projects = @projects.joins(:financial).where("financial.is_active = true")
+    end
+
+    if params.has_key?("listing_id")
+      @projects = @projects.where(:listing_id => params["listing_id"].to_i)
     end
 
     render json: @projects.all.as_json(:include => [:development_plan, :financial])

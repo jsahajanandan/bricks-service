@@ -28,6 +28,8 @@ ActiveRecord::Schema.define(version: 20151016073501) do
     t.datetime "updated_at",                                                        null: false
   end
 
+  add_index "development_plans", ["project_id"], name: "index_development_plans_on_project_id", unique: true, using: :btree
+
   create_table "financials", force: :cascade do |t|
     t.integer  "project_id"
     t.decimal  "land_cost",               precision: 20, scale: 2, null: false
@@ -42,6 +44,8 @@ ActiveRecord::Schema.define(version: 20151016073501) do
     t.datetime "updated_at",                                       null: false
   end
 
+  add_index "financials", ["project_id"], name: "index_financials_on_project_id", unique: true, using: :btree
+
   create_table "projects", force: :cascade do |t|
     t.integer  "user_id",                           null: false
     t.integer  "listing_id",                        null: false
@@ -49,5 +53,7 @@ ActiveRecord::Schema.define(version: 20151016073501) do
     t.datetime "created_at",                        null: false
     t.datetime "updated_at",                        null: false
   end
+
+  add_index "projects", ["listing_id"], name: "index_projects_on_listing_id", unique: true, using: :btree
 
 end

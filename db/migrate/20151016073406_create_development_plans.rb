@@ -10,5 +10,6 @@ class CreateDevelopmentPlans < ActiveRecord::Migration
       t.date :completion_date, null: false
       t.timestamps null: false
     end
+    add_index :development_plans, :project_id, unique: true
   end
 end

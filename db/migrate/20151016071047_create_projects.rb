@@ -6,5 +6,6 @@ class CreateProjects < ActiveRecord::Migration
       t.integer :project_tag, limit: 1, default: 0
       t.timestamps null: false
     end
+    add_index :projects, :listing_id, unique: true
   end
 end
