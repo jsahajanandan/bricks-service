@@ -6,6 +6,7 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 projects_saved = false
+roi_pitch = 'We are building a multi-storeyed, amenity-enabled standalone building that will hime 12 apartments. The land on which the building will be built is title and litigation free and located in the Koramangala neighborhood in Bangalore - one of the hottest localities in the city with the highest rate of appreciation in real estate for the last 10 years and forecasted to only see further appreciation as Bangalore continues to attract more companies and people. If you are looking to invest in a property that sees rapid appreciation and equally quick liquidity, you would be interested in investing here.'
 Project.transaction do
   listing_ids = 1..51
   listing_ids.each do |listing_id|
@@ -60,7 +61,7 @@ Project.transaction do
                 num_bricks: num_bricks,
                 brick_value: brick_value,
                 personal_investment: personal_investment,
-                roi_pitch: "ROI ROI ROI ROI ROI!", # Replace
+                roi_pitch: roi_pitch,
                 is_active: true,
                 fund_raise_completion: fund_raise_completion,
                 milestones: milestones
