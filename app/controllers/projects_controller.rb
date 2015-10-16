@@ -6,15 +6,15 @@ class ProjectsController < ApplicationController
   def index
     @projects = Project
 
-    if params.has_key("user_id")
+    if params.has_key?("user_id")
       @projects = @projects.where(:user_id => params["user_id"].to_i)
     end
 
-    if params.has_key("is_active")
+    if params.has_key?("is_active")
       @projects = @projects.joins(:financial).where("financial.is_active = true")
     end
 
-    render json: @projects.as_json(:include => [:development_plan, :financial])
+    render json: @projects.all.as_json(:include => [:development_plan, :financial])
   end
 
   # GET /projects/1
