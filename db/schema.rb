@@ -37,8 +37,7 @@ ActiveRecord::Schema.define(version: 20151016073501) do
     t.integer  "num_bricks",                                       null: false
     t.decimal  "brick_value",             precision: 20, scale: 2, null: false
     t.decimal  "personal_investment",     precision: 20, scale: 2, null: false
-    t.integer  "time_frame_days",                                  null: false
-    t.text     "roi_pitch"
+    t.text     "roi_pitch",                                        null: false
     t.boolean  "is_active"
     t.datetime "created_at",                                       null: false
     t.datetime "updated_at",                                       null: false
