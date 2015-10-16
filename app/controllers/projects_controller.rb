@@ -6,10 +6,6 @@ class ProjectsController < ApplicationController
   def index
     @projects = Project
 
-    if params.has_key?("user_id")
-      @projects = @projects.where(:user_id => params["user_id"].to_i)
-    end
-
     if params.has_key?("active")
       @projects = @projects.joins(:financial).where("financial.is_active = true")
     end
@@ -72,7 +68,7 @@ class ProjectsController < ApplicationController
     end
 
     def project_params
-      params.require(:project).permit(:user_id, :listing_id, :project_tag,
+      params.require(:project).permit(:listing_id, :project_tag,
                                       development_plan_attributes: [:num_floors, :num_flats, :flat_type, :flat_area, :flat_selling_price, :completion_date],
                                       financial_attributes: [:land_cost, :investment_sum_required, :num_bricks, :brick_value, :personal_investment, :time_frame_days, :roi_pitch, :is_active])
     end

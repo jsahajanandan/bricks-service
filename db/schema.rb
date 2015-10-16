@@ -47,7 +47,6 @@ ActiveRecord::Schema.define(version: 20151016073501) do
   add_index "financials", ["project_id"], name: "index_financials_on_project_id", unique: true, using: :btree
 
   create_table "projects", force: :cascade do |t|
-    t.integer  "user_id",                           null: false
     t.integer  "listing_id",                        null: false
     t.integer  "project_tag", limit: 2, default: 0
     t.datetime "created_at",                        null: false
