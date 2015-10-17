@@ -9,6 +9,7 @@ class Project < ActiveRecord::Base
   enum project_tag: {UNKNOWN: 0, HOT_INVESTMENT: 1, RISING: 2, POPULAR_LOCATION: 3, NEW: 4}
   def serializable_hash(options={})
     h = super(options)
+    h['num_backers'] = (rand * 10000).to_i + 1
     h['project_tag'] = h['project_tag'].gsub('_', ' ')
     h
   end
