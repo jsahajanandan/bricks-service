@@ -172,7 +172,7 @@ class ProjectsController < ApplicationController
 
       if fund_end_date > Time.now.to_date
         end_date = Time.now.to_date
-        target = total_bricks * (Time.now.to_date - start_date) / (fund_end_date - start_date)
+        target = (total_bricks * rand).to_i
       else
         end_date = fund_end_date
         target = total_bricks
@@ -186,17 +186,21 @@ class ProjectsController < ApplicationController
         random_diff = (rand * diff * 2).to_i
         bricks = bricks + random_diff
         if bricks >= target
+          puts :h
           bricks = bricks - random_diff
-          stats[:bricks][day] = total_bricks - bricks
-          bricks = total_bricks
+          stats[:bricks][day] =target - bricks
+          bricks = target
         else
+          puts :l
           stats[:bricks][day] = random_diff
         end
       end
 
-      puts target
-      puts bricks
+      stats['fund_progress'] = ((bricks* 100)/total_bricks ).to_i
+      stats['fund_progress'] = 100 if stats['fund_progress'] > 100
 
+      puts total_bricks
+      puts bricks
     end
 
     stats
