@@ -77,8 +77,8 @@ class ProjectsController < ApplicationController
   def add_bricks
     if (params[:user_id] && params[:num_bricks] && params[:listing_id])
       @project = Project.find_by_listing_id(params[:listing_id].to_i)
-      if @project.financial.fund_raise_completion >= Date.today
-        render json: {error: "project still in fund raise period"}, status: :unprocessable_entity and return
+      if @project.financial.fund_raise_start >= Date.today
+        render json: {error: "project not in fund raise period"}, status: :unprocessable_entity and return
       end
       existing_bricks = @project.brick_holders.where(:user_id => params[:user_id].to_i)
       if existing_bricks.count > 0
