@@ -17,15 +17,34 @@ def get_random_date(t1, t2)
   rt.strftime("%Y-%m-%d")
 end
 
+
 projects_saved = false
 projects = 0
 project_with_brick_holders = 0
+
+listing_ids = 1..51
+
+uri = URI.parse('https://listings-dev.plotandland.com/listings?page=1&per_page=52&ids=' + listing_ids.to_a.join(','))
+http = Net::HTTP.new(uri.host, uri.port)
+http.use_ssl = true
+http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+req = Net::HTTP::Get.new(uri.request_uri)
+req.content_type = 'application/json'
+#req['Authorization'] = "Internal #{SECRET_TOKEN}"
+req['Accept'] = "application/json; version=1"
+res = http.request(req)
+listings_details = JSON.parse(res.body)
+listings = {}
+listings_details['active_listings'].each do |listing|
+  listings[listing['listing_id'].to_i] = listing['listing_listed_by']
+end
+
 roi_pitch = 'We are building a multi-storeyed, amenity-enabled standalone building that will home 12 apartments. The land on which the building will be built is title and litigation free and located in the Koramangala neighborhood in Bangalore - one of the hottest localities in the city with the highest rate of appreciation in real estate for the last 10 years and forecasted to only see further appreciation as Bangalore continues to attract more companies and people. If you are looking to invest in a property that sees rapid appreciation and equally quick liquidity, you would be interested in investing here.'
 Project.transaction do
   projects_for_bricks = []
-  listing_ids = 1..51
+
   listing_ids.each do |listing_id|
-    x = rand*15
+    next unless listings[listing_id]
     flat_area = 900 + (rand * 16).to_i * 10
     num_floors = (rand * 3).to_i + 4
     num_flats = (rand * 6).to_i + 10
@@ -33,6 +52,7 @@ Project.transaction do
     completion_time = get_random_date(Time.local(2016, 06, 06), Time.local(2017, 12, 12))
     fund_raise_start = get_random_date(Time.local(2015, 10, 01), Time.local(2015, 10, 31))
     fund_raise_completion = (fund_raise_start.to_time + (rand * 20 + 10).days).strftime("%Y-%m-%d")
+
 
     milestones = [
         {name: 'Basement', fund: 20},
@@ -58,6 +78,7 @@ Project.transaction do
     num_bricks = (investment_sum_required + personal_investment + land_cost) / brick_value
     project_tag = (rand * 4).to_i + 1
     flat_type = (rand * 3).to_i + 1
+    owner_bricks = (personal_investment/(investment_sum_required + personal_investment + land_cost))*num_bricks
 
     params = {
         listing_id: listing_id,
@@ -83,7 +104,9 @@ Project.transaction do
             milestones: milestones
         }
     }
+
     p = Project.create!(params)
+    p.brick_holders.create!({:user_id => listings[listing_id], :num_bricks => owner_bricks})
     if p.financial.fund_raise_completion < Date.today
       projects_for_bricks.push(p)
     end
