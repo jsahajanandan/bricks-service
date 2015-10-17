@@ -55,7 +55,7 @@ Project.transaction do
     investment_sum_required = [0.8, 0.7, 0.6][rand * 3] * (flat_selling_price * num_flats)
     personal_investment = land_cost + [0.1, 0.2, 0.3][rand * 3] * investment_sum_required
     brick_value = ((rand * 5).to_i) * 1000 + 1000
-    num_bricks = (investment_sum_required + land_cost) / brick_value
+    num_bricks = (investment_sum_required + personal_investment + land_cost) / brick_value
     project_tag = (rand * 4).to_i + 1
     flat_type = (rand * 3).to_i + 1
 
