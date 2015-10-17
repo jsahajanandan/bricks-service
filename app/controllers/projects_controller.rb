@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_action :set_project, only: [:show, :update, :add_bricks, :destroy]
+  before_action :set_project, only: [:show, :update, :destroy]
 
   # GET /projects
   # GET /projects.json
@@ -75,7 +75,8 @@ class ProjectsController < ApplicationController
   end
 
   def add_bricks
-    if (params[:user_id] && params[:num_bricks])
+    if (params[:user_id] && params[:num_bricks] && params[:listing_id])
+      @project = Project.find_by_listing_id(params[:listing_id].to_i)
       if @project.financial.fund_raise_completion >= Date.today
         render json: {error: "project still in fund raise period"}, status: :unprocessable_entity and return
       end

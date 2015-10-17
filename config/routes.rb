@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   resources :projects, except: [:new, :edit] do
-    member do
+    collection do
       post 'add_bricks'
     end
   end
